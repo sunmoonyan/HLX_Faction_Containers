@@ -2,6 +2,18 @@ if SERVER then
     local container = ix.plugin.list["containers"]
     Faction_Containers_DB["faction_container"] = Faction_Containers_DB["faction_container"] or {}
 
+hook.Add( "EntityTakeDamage", "ForceLeaveContainer", function( target, dmginfo )
+        if target:IsPlayer() then
+        local client = target
+        local inventory = client.ixOpenStorage
+        if (inventory) then
+        net.Start("ixStorageExpired")
+        net.Send(client)
+        ix.storage.RemoveReceiver(client, inventory)
+        end
+    end
+end )
+
     function PLUGIN:LoadContainer()
         if Faction_Containers_DB["faction_container"] then
             for _, v in ipairs(Faction_Containers_DB["faction_container"]) do
