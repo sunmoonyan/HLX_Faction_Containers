@@ -1,6 +1,50 @@
 if SERVER then
     local container = ix.plugin.list["containers"]
     Faction_Containers_DB["faction_container"] = Faction_Containers_DB["faction_container"] or {}
+local character = ix.meta.character
+
+
+function PLUGIN:PlayerJoinedClass(client, class, oldClass)
+    local char = client:GetCharacter()
+    local charInv = char:GetInventory()
+        for _, v in pairs(charInv:GetItems()) do
+            if v:GetData("factionitem") then
+                v:Remove()
+            end
+        end
+end
+
+
+
+
+if not character._SetFaction then
+    character._SetFaction = character.SetFaction -- backup original
+end
+
+function character:SetFaction(factionID, ...)
+    local oldFaction = self:GetFaction()
+
+    -- Call original function
+    local result = self:_SetFaction(factionID, ...)
+
+    -- Only fire if it actually changed
+    if oldFaction ~= factionID then
+        hook.Run("CharacterFactionChanged", self, oldFaction, factionID)
+    end
+
+    return result
+end
+
+hook.Add("CharacterFactionChanged", "RemoveFactionItems", function(self, oldFaction, faction)
+    local charInv = self:GetInventory()
+        for _, v in pairs(charInv:GetItems()) do
+            if v:GetData("factionitem") then
+                v:Remove()
+            end
+        end
+end)
+
+
 
 hook.Add( "EntityTakeDamage", "ForceLeaveContainer", function( target, dmginfo )
         if target:IsPlayer() then
