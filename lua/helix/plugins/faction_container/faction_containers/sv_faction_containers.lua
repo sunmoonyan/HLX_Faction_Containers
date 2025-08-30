@@ -181,9 +181,7 @@ end )
     end
 
     function PLUGIN:CanPlayerCombineItem(client, item, other)
-        local char = client:GetCharacter()
-        local inv = char:GetInventory()
-        local itemb = inv:GetItemByID(item)
+        local itemb = ix.item.instances[item]
 
         if itemb and itemb:GetData("factionitem") then
             return false
