@@ -173,10 +173,8 @@ end )
     end
 
     function PLUGIN:CanPlayerDropItem(client, item)
-        local char = client:GetCharacter()
-        local inv = char:GetInventory()
-        local itemb = inv:GetItemByID(item)
-
+        local itemb = ix.item.instances[item]
+ 
         if itemb and itemb:GetData("factionitem") then
             return false
         end
@@ -197,6 +195,7 @@ end )
         -- sauf si l'item est un jobitem et vient de factionstorage
         if oldInv["factionstorage"] and currentInv["owner"] ~= nil then
             if not (item:GetData("factionitem") and oldInv["factionstorage"]) then
+                            print("false")
                 return false
             end
         end
@@ -205,6 +204,7 @@ end )
         -- sauf s'il vient de factionstorage
         if item:GetData("factionitem") and currentInv["owner"] ~= nil then
             if not oldInv["factionstorage"] then
+                            print("false")
                 return false
             end
         end
