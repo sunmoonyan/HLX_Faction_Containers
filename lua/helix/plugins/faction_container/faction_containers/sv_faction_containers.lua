@@ -176,7 +176,7 @@ end )
         local itemb = ix.item.instances[item]
  
         if itemb and itemb:GetData("factionitem") then
-            return false
+            return false,ix.util.NotifyLocalized("cantdropfactionitem",client)
         end
     end
 
@@ -233,7 +233,7 @@ end )
             end
 
             if not isInvFaction then
-                client:Notify("You are not allowed to access this storage")
+                ix.util.NotifyLocalized("cantaccess",client)
                 return
             end
         end
@@ -248,7 +248,7 @@ end )
             end
 
             if not isInvClasses then
-                client:Notify("You are not allowed to access this storage")
+                ix.util.NotifyLocalized("cantaccess",client)
                 return
             end
         end
