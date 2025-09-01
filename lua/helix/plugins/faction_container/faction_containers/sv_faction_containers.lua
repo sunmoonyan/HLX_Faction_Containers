@@ -14,28 +14,7 @@ function PLUGIN:PlayerJoinedClass(client, class, oldClass)
         end
 end
 
-
-
-
-if not character._SetFaction then
-    character._SetFaction = character.SetFaction -- backup original
-end
-
-function character:SetFaction(factionID, ...)
-    local oldFaction = self:GetFaction()
-
-    -- Call original function
-    local result = self:_SetFaction(factionID, ...)
-
-    -- Only fire if it actually changed
-    if oldFaction ~= factionID then
-        hook.Run("CharacterFactionChanged", self, oldFaction, factionID)
-    end
-
-    return result
-end
-
-hook.Add("CharacterFactionChanged", "RemoveFactionItems", function(self, oldFaction, faction)
+hook.Add("OnCharacterTransferred", "RemoveFactionItems", function(self, faction)
     local charInv = self:GetInventory()
         for _, v in pairs(charInv:GetItems()) do
             if v:GetData("factionitem") then
@@ -208,10 +187,9 @@ end )
 
 
 
-    local realOpen = ix.storage.Open
 
-    function ix.storage.Open(client, inventory, info)
-        info = info or {}
+    hook.Add("CanAccessContainer", "FactionCanAccess", function(client, inventory, info)
+
         local char = client:GetCharacter()
         local charFaction = string.lower(ix.faction.Get(client:Team()).name)
 
@@ -234,7 +212,7 @@ end )
 
             if not isInvFaction then
                 ix.util.NotifyLocalized("cantaccess",client)
-                return
+                return false
             end
         end
 
@@ -249,20 +227,12 @@ end )
 
             if not isInvClasses then
                 ix.util.NotifyLocalized("cantaccess",client)
-                return
+                return false
             end
         end
 
-        info.OnPlayerClose = function(ply)
-            hook.Run("OnContainerClosed", ply, inventory, info)
-        end
+    end)
 
-        if not ix.storage.InUse(inventory) then
-            hook.Run("OnContainerOpened", client, inventory, info)
-        end
-
-        return realOpen(client, inventory, info)
-    end
 
     hook.Add("OnContainerOpened", "DebugContainerOpen", function(client, inventory, info)
         if inventory["factionstorage"] == true then
