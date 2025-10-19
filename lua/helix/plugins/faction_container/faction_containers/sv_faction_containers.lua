@@ -234,59 +234,69 @@ end )
     end)
 
 
-    hook.Add("OnContainerOpened", "DebugContainerOpen", function(client, inventory, info)
-        if inventory["factionstorage"] == true then
-            local char = client:GetCharacter()
-            local charInv = char:GetInventory()
-            local items = {}
-            local charFaction = string.lower(ix.faction.Get(client:Team()).name)
+hook.Add("OnContainerOpened", "DebugContainerOpen", function(client, inventory, info)
+    if inventory["factionstorage"] == true then
+        local char = client:GetCharacter()
+        if not char then 
+            return 
+        end
 
-            -- Vide le conteneur
-            for _, item in pairs(inventory:GetItems()) do
-                item:Remove()
-            end
+        local charInv = char:GetInventory()
+        local items = {}
+        local faction = ix.faction.Get(client:Team())
+        local charFaction = faction and string.lower(faction.name) or "unknown"
 
-            -- Liste des items actuels du joueur
-            for _, v in pairs(charInv:GetItems()) do
-                if v:GetData("factionitem") then
-                    table.insert(items, v.uniqueID)
-                end
-            end
+        -- Vide le conteneur
+        for _, item in pairs(inventory:GetItems()) do
+            item:Remove()
+        end
 
-            -- Fusion faction.items + class.items
-            local combinedItems = {}
-
-            for _, v in ipairs(ix.faction.Get(client:Team()).items or {}) do
-                table.insert(combinedItems, v)
-            end
-            if charClass then 
-            for _, v in ipairs(ix.class.Get(char:GetClass()).items or {}) do
-                table.insert(combinedItems, v)
-            end
-            end
-            -- Ajoute les manquants dans le conteneur
-            for _, v in ipairs(combinedItems) do
-                local hasItem = false
-
-                for i, item in ipairs(items) do
-                    if item == v then
-                        table.remove(items, i)
-                        hasItem = true
-                        break
-                    end
-                end
-
-                if not hasItem then
-                    inventory:Add(v)
-                end
-            end
-
-            -- Marque tout en jobitem
-            for _, v in pairs(inventory:GetItems()) do
-                v:SetData("factionitem", true)
+        -- Liste des items actuels du joueur
+        for _, v in pairs(charInv:GetItems()) do
+            if v:GetData("factionitem") then
+                table.insert(items, v.uniqueID)
             end
         end
-    end)
+
+        -- Fusion faction.items + class.items
+        local combinedItems = {}
+
+        for _, v in ipairs(faction.items or {}) do
+            table.insert(combinedItems, v)
+        end
+
+        local charClass = char:GetClass()
+        if charClass then 
+            local classData = ix.class.Get(charClass)
+            for _, v in ipairs(classData and classData.items or {}) do
+                table.insert(combinedItems, v)
+            end
+        end
+
+        -- Ajoute les manquants dans le conteneur
+        for _, v in ipairs(combinedItems) do
+            local hasItem = false
+
+            for i, item in ipairs(items) do
+                if item == v then
+                    table.remove(items, i)
+                    hasItem = true
+                    break
+                end
+            end
+
+            if not hasItem then
+                inventory:Add(v)
+            end
+        end
+
+        -- Marque tout en jobitem
+        for _, v in pairs(inventory:GetItems()) do
+            v:SetData("factionitem", true)
+        end
+    end
+end)
+
 
     hook.Add("OnContainerClosed", "DebugContainerClose", function(client, inventory, info)
         if inventory["factionstorage"] == true then

@@ -23,11 +23,11 @@ if SERVER then
     Faction_Containers_DB = Faction_Containers_DB or {}
 
     function PLUGIN:LoadData()
-        for i,v in ipairs(self.requires) do
-            if ix.plugin.list[v] == nil then 
-                --HLXRP_PluginRequirement(string.upper(v))
-            end
-        end
+
+      if ix.plugin.list["containers"] == nil then 
+        MsgC(Color(200, 75, 75), "[PLUGIN CONTAINERS MISSING]\n")
+      end
+
         Faction_Containers_DB = self:GetData()
         self:LoadContainer()
     end
